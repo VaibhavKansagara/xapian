@@ -49,3 +49,5 @@ scorer/.deps
 scorer/.dirstamp
 scorer/.libs
 stamp-h1
+/xapianletor-config
+/installable

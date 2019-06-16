@@ -653,6 +653,9 @@ esac
 ACLOCAL="${ACLOCAL-aclocal} -I `pwd`/xapian-core/m4-macros"
 export ACLOCAL
 
+ACLOCAL="${ACLOCAL-aclocal} -I `pwd`/xapian-letor/m4-macros"
+export ACLOCAL
+
 intree_swig=no
 modules=
 for module in ${@:-xapian-core xapian-applications/omega swig xapian-bindings} ; do
