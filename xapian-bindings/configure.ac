@@ -129,7 +129,7 @@ AM_CONDITIONAL(NEED_INTREE_DYLD, test yes = "$NEED_INTREE_DYLD")
 dnl We want XAPIAN_CXXFLAGS to be used for configure tests, so add it to
 dnl CXXFLAGS for the duration of configure.
 save_CXXFLAGS=$CXXFLAGS
-CXXFLAGS="$CXXFLAGS $XAPIAN_CXXFLAGS"
+CXXFLAGS="$CXXFLAGS $XAPIAN_CXXFLAGS $XAPIANLETOR_CXXFLAGS"
 
 dnl COMPAT_VERSION is the version of xapian-core that "matches" our version.
 dnl We allow for bindings being version 0.8.5.1 while xapian-core is 0.8.5.
@@ -201,7 +201,9 @@ if test x$USE_MAINTAINER_MODE = xyes; then
       fi ;;
   esac
   SWIG_FLAGS=`$XAPIAN_CONFIG --swigflags`
-  AC_SUBST(SWIG_FLAGS)
+  AC_SUBST([SWIG_FLAGS])
+  SWIG_LETOR_FLAGS=`$XAPIANLETOR_CONFIG --swigflags`
+  AC_SUBST([SWIG_LETOR_FLAGS])
   XAPIAN_HEADER_DIRS=
   XAPIAN_HEADERS=
   for a in $SWIG_FLAGS ; do

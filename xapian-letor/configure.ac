@@ -160,7 +160,7 @@ AC_SUBST([ldflags])
 
 dnl We want XAPIAN_CXXFLAGS to be used for configure tests.
 save_CXXFLAGS=$CXXFLAGS
-CXXFLAGS="$CXXFLAGS $XAPIAN_CXXFLAGS"
+CXXFLAGS="$CXXFLAGS $XAPIAN_CXXFLAGS $XAPIANLETOR_CXXFLAGS"
 
 dnl We need to specify the argument types for builtin functions, or else
 dnl AC_CHECK_DECLS fails to detect them when the compiler is clang.

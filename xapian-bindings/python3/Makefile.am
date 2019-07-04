@@ -33,6 +33,7 @@ RST_DOCS = \
 BUILT_SOURCES = xapian_wrap.cc xapian_wrap.h xapian.py
 
 EXTRA_DIST = python.i util.i extra.i extracomments.i except.i \
+	exceptletor.i \
 	doxy2swig.py \
 	fixup-swig-py3-wrapper \
 	generate-python-exceptions \
@@ -113,9 +114,12 @@ clean-local:
 	rm -rf db_test_* dbs_replication
 
 if MAINTAINER_MODE
-BUILT_SOURCES += except.i doccomments.i
+BUILT_SOURCES += except.i exceptletor.i doccomments.i
 except.i: $(srcdir)/generate-python-exceptions ../../xapian-core/exception_data.pm
 	$(PERL) -w -I$(srcdir)/../../xapian-core $(srcdir)/generate-python-exceptions
+
+exceptletor.i: $(srcdir)/generate-python-exceptions ../../xapian-letor/exception_data.pm
+	$(PERL) -w -I$(srcdir)/../../xapian-letor $(srcdir)/generate-python-exceptions
 
 if MAINTAINER_NO_DOCS
 doccomments.i:
@@ -139,9 +143,9 @@ SWIG_FLAGS += -DSWIG_PYTHON_LEGACY_BOOL
 
 xapian_wrap.cc xapian_wrap.h xapian.py xapian_wrap.d: $(stamp)
 	$(make_many_locked)
-$(stamp): except.i doccomments.i fixup-swig-py3-wrapper
+$(stamp): except.i exceptletor.i doccomments.i fixup-swig-py3-wrapper
 	$(multitarget_begin)
-	$(RUN_SWIG) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) -c++ \
+	$(RUN_SWIG) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) $(SWIG_LETOR_FLAGS) -c++ \
 	    -python -threads -shadow -O \
 	    -o xapian_wrap.cc '$(srcdir)/'python.i
 	$(PERL) -i $(srcdir)/fixup-swig-py3-wrapper xapian.py
