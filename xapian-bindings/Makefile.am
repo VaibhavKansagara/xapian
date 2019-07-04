@@ -7,7 +7,7 @@ export ACLOCAL AUTOCONF AUTOHEADER AUTOM4TE AUTOMAKE
 endif
 
 EXTRA_DIST = xapian-head.i xapian-headers.i generic/except.i \
-	generic/exceptletor.i
+    generic/exceptletor.i \
     generic/generate-generic-exceptions \
     swig-depcomp \
     xapian-bindings.spec shortstop.list skiptest \
