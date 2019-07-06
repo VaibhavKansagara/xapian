@@ -9,6 +9,7 @@
 /xapian
 /modern
 /except.i
+/exceptletor.i
 /doccomments.i
 /doctrees
 /docs/conf.py

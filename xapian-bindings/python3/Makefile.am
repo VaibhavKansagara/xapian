@@ -30,9 +30,12 @@ RST_DOCS = \
 # Therefore, we don't run it by default currently.
 # replicationtest.py
 
-BUILT_SOURCES = xapian_wrap.cc xapian_wrap.h xapian.py
+BUILT_SOURCES = xapian_wrap.cc xapian_wrap.h xapian.py \
+	xapianletor_wrap.cc \
+	xapianletor_wrap.h \
+	xapianletor.py
 
-EXTRA_DIST = python.i util.i extra.i extracomments.i except.i \
+EXTRA_DIST = python.i pythonletor.i util.i extra.i extracomments.i except.i \
 	exceptletor.i \
 	doxy2swig.py \
 	fixup-swig-py3-wrapper \
@@ -43,38 +46,54 @@ EXTRA_DIST = python.i util.i extra.i extracomments.i except.i \
 	test_xapian_star.py \
 	$(TESTS) $(BUILT_SOURCES) $(RST_DOCS)
 
-pkgpylibdir = @PYTHON3_LIB@/xapian
+pkgpylibdir = @PYTHON3_LIB@/xapian \
+	@PYTHON3_LIB@/xapianletor
 
 # Install as _DATA rather than _SCRIPTS because we don't want to make these
 # executable (they don't have a #! line).
 pkgpylib_DATA = xapian/__init__.py \
 		xapian/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
-		xapian/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@
+		xapian/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@ \
+		xapianletor/__init__.py \
+		xapianletor/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
+		xapianletor/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@
 
-pkgpylib_LTLIBRARIES = _xapian.la
+pkgpylib_LTLIBRARIES = _xapian.la _xapianletor.la
 
 # Remove the .la file - _xapian.la is never linked against (it's a module)
 # and Python doesn't use libltdl.  Note that the library gets installed by
 # install-data, so that's where we need to hook.
 install-data-hook:
 	rm -f $(DESTDIR)$(pkgpylibdir)/_xapian.la
+	rm -f $(DESTDIR)$(pkgpylibdir)/_xapianletor.la
 
 # Because we don't install the .la file, "make uninstall" doesn't work and
 # we need to remove the file ourselves.
 uninstall-local:
 	rm -f $(DESTDIR)$(pkgpylibdir)/_xapian$(PYTHON3_SO)
+	rm -f $(DESTDIR)$(pkgpylibdir)/_xapianletor$(PYTHON3_SO)
 
 AM_CPPFLAGS = -I$(PYTHON3_INC)
-AM_CXXFLAGS = $(SWIG_CXXFLAGS) $(XAPIAN_CXXFLAGS)
+AM_CXXFLAGS = $(SWIG_CXXFLAGS) $(XAPIAN_CXXFLAGS) $(XAPIANLETOR_CXXFLAGS)
 _xapian_la_LDFLAGS = -avoid-version -module -shrext "$(PYTHON3_SO)" $(NO_UNDEFINED)
 _xapian_la_SOURCES = xapian_wrap.cc
 _xapian_la_LIBADD = $(XAPIAN_LIBS) $(PYTHON3_LIBS)
+
+_xapianletor_la_LDFLAGS = -avoid-version -module -shrext "$(PYTHON3_SO)" $(NO_UNDEFINED)
+_xapianletor_la_SOURCES = xapianletor_wrap.cc
+_xapianletor_la_LIBADD = $(XAPIANLETOR_LIBS) $(PYTHON3_LIBS)
 
 # We want `xapian/__init__.py` rather than xapian.py so the module is treated
 # as a package.
 xapian/__init__.py: xapian.py
 	$(MKDIR_P) xapian
 	cp `test -f xapian.py || echo '$(srcdir)/'`xapian.py xapian/__init__.py
+
+# We want `xapianletor/__init__.py` rather than xapianletor.py so the module is treated
+# as a package.
+xapianletor/__init__.py: xapianletor.py
+	$(MKDIR_P) xapianletor
+	cp `test -f xapianletor.py || echo '$(srcdir)/'`xapianletor.py xapianletor/__init__.py
 
 # We "import _xapian" first so that if we fail to import the glue library
 # we don't generate a broken .pyc or .pyo, and we do it with the current
@@ -100,17 +119,46 @@ xapian/_xapian$(PYTHON3_SO): _xapian.la
 	. ./libtoolconfig.tmp; cp $$objdir/_xapian$(PYTHON3_SO) xapian
 	rm -f libtoolconfig.tmp
 
+# We "import _xapianletor" first so that if we fail to import the glue library
+# we don't generate a broken .pyc or .pyo, and we do it with the current
+# directory set to where the module is as Python with -c always searches the
+# current directory first.
+#
+# We then "import xapianletor" as a separate command, as that's more like how things
+# are once installed - in particular this will fail if the SWIG shadow wrapper
+# doesn't cope with being xapianletor/__init__.py (currently it needs fixing
+# up, which is done by fixup-swig-py3-wrapper).
+xapianletor/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc: xapianletor/__init__.py xapianletor/_xapianletor$(PYTHON3_SO)
+	$(OSX_SIP_HACK_ENV) $(PYTHON3) -c 'import os;os.chdir("xapianletor");import _xapianletor'
+	$(OSX_SIP_HACK_ENV) $(PYTHON3) -c 'import xapianletor'
+
+xapianletor/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@: xapianletor/__init__.py xapianletor/_xapianletor$(PYTHON3_SO)
+	$(OSX_SIP_HACK_ENV) $(PYTHON3) -O -c 'import os;os.chdir("xapianletor");import _xapianletor'
+	$(OSX_SIP_HACK_ENV) $(PYTHON3) -O -c 'import xapianletor'
+
+xapianletor/_xapianletor$(PYTHON3_SO): _xapianletor.la
+	$(MKDIR_P) xapianletor
+	$(LIBTOOL) --config > libtoolconfig.tmp
+## ksh requires a path on the sourced file.
+	. ./libtoolconfig.tmp; cp $$objdir/_xapianletor$(PYTHON3_SO) xapianletor
+	rm -f libtoolconfig.tmp
+
 CLEANFILES = \
     xapian/_xapian$(PYTHON3_SO) \
     xapian/__init__.py \
     xapian/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
     xapian/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@ \
+    xapianletor/_xapianletor$(PYTHON3_SO) \
+    xapianletor/__init__.py \
+    xapianletor/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
+    xapianletor/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@ \
     $(srcdir)/*.pyc
 
 # Clean the xapian directory which we created, if it's empty, and any
 # databases created by test cases.
 clean-local:
 	-rmdir xapian
+	-rmdir xapianletor
 	rm -rf db_test_* dbs_replication
 
 if MAINTAINER_MODE
@@ -118,8 +166,8 @@ BUILT_SOURCES += except.i exceptletor.i doccomments.i
 except.i: $(srcdir)/generate-python-exceptions ../../xapian-core/exception_data.pm
 	$(PERL) -w -I$(srcdir)/../../xapian-core $(srcdir)/generate-python-exceptions
 
-exceptletor.i: $(srcdir)/generate-python-exceptions ../../xapian-letor/exception_data.pm
-	$(PERL) -w -I$(srcdir)/../../xapian-letor $(srcdir)/generate-python-exceptions
+exceptletor.i: $(srcdir)/generate-letor-python-exceptions ../../xapian-letor/exception_data.pm
+	$(PERL) -w -I$(srcdir)/../../xapian-letor $(srcdir)/generate-letor-python-exceptions
 
 if MAINTAINER_NO_DOCS
 doccomments.i:
@@ -143,9 +191,9 @@ SWIG_FLAGS += -DSWIG_PYTHON_LEGACY_BOOL
 
 xapian_wrap.cc xapian_wrap.h xapian.py xapian_wrap.d: $(stamp)
 	$(make_many_locked)
-$(stamp): except.i exceptletor.i doccomments.i fixup-swig-py3-wrapper
+$(stamp): except.i doccomments.i fixup-swig-py3-wrapper
 	$(multitarget_begin)
-	$(RUN_SWIG) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) $(SWIG_LETOR_FLAGS) -c++ \
+	$(RUN_SWIG) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) -c++ \
 	    -python -threads -shadow -O \
 	    -o xapian_wrap.cc '$(srcdir)/'python.i
 	$(PERL) -i $(srcdir)/fixup-swig-py3-wrapper xapian.py
@@ -153,7 +201,23 @@ $(stamp): except.i exceptletor.i doccomments.i fixup-swig-py3-wrapper
 
 -include xapian_wrap.d
 
-CLEANFILES += xapian_wrap.d $(stamp)
+stampletor = xapianletor_wrap.stamp
+RUN_SWIG_LETOR = stampletor='$(stampletor)' $(PERL) '$(top_srcdir)'/swig-depcomp $(SWIG)
+
+xapianletor_wrap.cc xapianletor_wrap.h xapianletor.py xapianletor_wrap.d: $(stampletor)
+	$(make_many_locked)
+$(stampletor): exceptletor.i fixup-swig-py3-wrapper
+	$(multitarget_begin)
+	$(RUN_SWIG_LETOR) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) $(SWIGLETOR_FLAGS) -c++ \
+	    -python -threads -shadow -O \
+	    -o xapianletor_wrap.cc '$(srcdir)/'pythonletor.i
+	$(PERL) -i $(srcdir)/fixup-swig-py3-wrapper xapianletor.py
+	$(multitarget_end)
+
+-include xapianletor_wrap.d
+
+CLEANFILES += xapian_wrap.d $(stamp) \
+	xapianletor_wrap.d $(stampletor)
 endif
 MAINTAINERCLEANFILES = $(BUILT_SOURCES)
 
