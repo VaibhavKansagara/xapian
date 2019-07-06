@@ -35,7 +35,7 @@ BUILT_SOURCES = xapian_wrap.cc xapian_wrap.h xapian.py \
 	xapianletor_wrap.h \
 	xapianletor.py
 
-EXTRA_DIST = python.i pythonletor.i util.i extra.i extracomments.i except.i \
+EXTRA_DIST = python.i pythonletor.i util.i utilletor.i extra.i extracomments.i except.i \
 	exceptletor.i \
 	doxy2swig.py \
 	fixup-swig-py3-wrapper \
@@ -208,7 +208,7 @@ xapianletor_wrap.cc xapianletor_wrap.h xapianletor.py xapianletor_wrap.d: $(stam
 	$(make_many_locked)
 $(stampletor): exceptletor.i fixup-swig-py3-wrapper
 	$(multitarget_begin)
-	$(RUN_SWIG_LETOR) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) $(SWIGLETOR_FLAGS) -c++ \
+	$(RUN_SWIG_LETOR) $(SWIG_WERROR) -I. -I'$(srcdir)' $(SWIG_FLAGS) $(SWIG_LETOR_FLAGS) -c++ \
 	    -python -threads -shadow -O \
 	    -o xapianletor_wrap.cc '$(srcdir)/'pythonletor.i
 	$(PERL) -i $(srcdir)/fixup-swig-py3-wrapper xapianletor.py

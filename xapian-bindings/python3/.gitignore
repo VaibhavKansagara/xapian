@@ -28,3 +28,8 @@
 /xapian_wrap.d
 /xapian_wrap.h
 /xapian_wrap.stamp
+/xapianletor.py
+/xapianletor_wrap.cc
+/xapianletor_wrap.d
+/xapianletor_wrap.h
+/xapianletor_wrap.stamp

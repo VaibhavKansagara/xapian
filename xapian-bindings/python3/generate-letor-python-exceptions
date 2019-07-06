@@ -24,28 +24,6 @@ use exception_data;
 
 my @allclasses = (@baseclasses, @classes);
 
-my @posting_source_virtual_methods = qw(
-    get_termfreq_min
-    get_termfreq_est
-    get_termfreq_max
-    get_maxweight
-    get_weight
-    next
-    skip_to
-    check
-    at_end
-    get_docid
-    get_description
-    init
-    name
-);
-
-my @matchspy_virtual_methods = qw(
-    name
-    merge_results
-    get_description
-);
-
 open FD, ">exceptletor.i" or die $!;
 
 $copyright =~ s/^/ */mg;
@@ -63,25 +41,6 @@ EOF
 
 print FD <<'EOF';
 namespace Xapian {
-
-%exceptionclass Error;
-%ignore Error::get_description;
-%extend Error {
-    std::string __str__() const {
-	std::string desc($self->get_msg());
-	if (!$self->get_context().empty()) {
-	    desc += " (context: ";
-	    desc += $self->get_context();
-	    desc += ')';
-	}
-	if ($self->get_error_string()) {
-	    desc += " (";
-	    desc += $self->get_error_string();
-	    desc += ')';
-	}
-	return desc;
-    }
-}
 EOF
 
 for (@allclasses) {
@@ -91,6 +50,7 @@ for (@allclasses) {
 
 print FD <<'EOF';
 }
+%include "xapian.h"
 %include "xapian-letor/letor_error.h"
 
 %{

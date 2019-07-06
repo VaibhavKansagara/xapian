@@ -169,7 +169,7 @@ class XapianSWIG_Python_Thread_Allow {
 
 %include ../xapianletor-head.i
 
-%include util.i
+%include utilletor.i
 
 // get_description() should return 'str' via the default typemap.
 %typemap(out) std::string get_description() = std::string;
