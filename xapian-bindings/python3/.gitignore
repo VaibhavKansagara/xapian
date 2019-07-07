@@ -6,7 +6,9 @@
 /.libs
 /*.pyc
 /_xapian.la
+/_xapianletor.la
 /xapian
+/xapianletor
 /modern
 /except.i
 /exceptletor.i

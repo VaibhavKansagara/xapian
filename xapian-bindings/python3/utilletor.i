@@ -31,66 +31,6 @@
 /* So iterator objects match the Python3 iterator API. */
 %rename(__next__) next;
 
-/* Hide "unsafe" C++ iterator methods. */
-%rename(_allterms_begin) Xapian::Database::allterms_begin;
-%rename(_allterms_end) Xapian::Database::allterms_end;
-%rename(_metadata_keys_begin) Xapian::Database::metadata_keys_begin;
-%rename(_metadata_keys_end) Xapian::Database::metadata_keys_end;
-%rename(_synonym_keys_begin) Xapian::Database::synonym_keys_begin;
-%rename(_synonym_keys_end) Xapian::Database::synonym_keys_end;
-%rename(_synonyms_begin) Xapian::Database::synonyms_begin;
-%rename(_synonyms_end) Xapian::Database::synonyms_end;
-%rename(_spellings_begin) Xapian::Database::spellings_begin;
-%rename(_spellings_end) Xapian::Database::spellings_end;
-%rename(_positionlist_begin) Xapian::Database::positionlist_begin;
-%rename(_positionlist_end) Xapian::Database::positionlist_end;
-%rename(_postlist_begin) Xapian::Database::postlist_begin;
-%rename(_postlist_end) Xapian::Database::postlist_end;
-%rename(_termlist_begin) Xapian::Database::termlist_begin;
-%rename(_termlist_end) Xapian::Database::termlist_end;
-%rename(_termlist_begin) Xapian::Document::termlist_begin;
-%rename(_termlist_end) Xapian::Document::termlist_end;
-%rename(_values_begin) Xapian::Document::values_begin;
-%rename(_values_end) Xapian::Document::values_end;
-%rename(_get_matching_terms_begin) Xapian::Enquire::get_matching_terms_begin;
-%rename(_get_matching_terms_end) Xapian::Enquire::get_matching_terms_end;
-%rename(_begin) Xapian::ESet::begin;
-%rename(_end) Xapian::ESet::end;
-%rename(_begin) Xapian::MSet::begin;
-%rename(_end) Xapian::MSet::end;
-%rename(_positionlist_begin) Xapian::PostingIterator::positionlist_begin;
-%rename(_positionlist_end) Xapian::PostingIterator::positionlist_end;
-%rename(_get_terms_begin) Xapian::Query::get_terms_begin;
-%rename(_get_terms_end) Xapian::Query::get_terms_end;
-%rename(_stoplist_begin) Xapian::QueryParser::stoplist_begin;
-%rename(_stoplist_end) Xapian::QueryParser::stoplist_end;
-%rename(_unstem_begin) Xapian::QueryParser::unstem_begin;
-%rename(_unstem_end) Xapian::QueryParser::unstem_end;
-%rename(_positionlist_begin) Xapian::TermIterator::positionlist_begin;
-%rename(_positionlist_end) Xapian::TermIterator::positionlist_end;
-
-/* We replace the get_hit() method with one which returns an MSetitem. */
-%rename(_get_hit_internal) Xapian::MSet::get_hit;
-
-%{
-namespace Xapian {
-    Query *get_py_query(PyObject *obj) {
-	PyObject * mythis = PyObject_GetAttrString(obj, "this");
-	if (!mythis)
-	    return 0;
-
-	Query * retval = 0;
-	int res = SWIG_ConvertPtr(mythis, (void **)&retval,
-				  SWIGTYPE_p_Xapian__Query, 0);
-	if (!SWIG_IsOK(res)) {
-	    retval = 0;
-	}
-	Py_DECREF(mythis);
-	return retval;
-    }
-}
-%}
-
 %fragment("XapianSWIG_anystring_as_ptr", "header", fragment="SWIG_AsPtr_std_string") {
 /* Utility function which works like SWIG_AsPtr_std_string, but
  * converts unicode strings to UTF-8 simple strings first. */
