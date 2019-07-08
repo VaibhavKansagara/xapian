@@ -41,7 +41,7 @@ namespace Xapian {
 
 /// Abstract base class for features in learning to rank
 class XAPIAN_VISIBILITY_DEFAULT Feature {
-  protected:
+  public:
     /// Stats which FeatureList can use.
     typedef enum {
 	/// Frequency of the Query Terms in the specified documents.
@@ -72,7 +72,6 @@ class XAPIAN_VISIBILITY_DEFAULT Feature {
     /// A bitmask of the statistics this Feature needs.
     stat_flags stats_needed;
 
-  public:
     /// @internal Class representing the Feature internals.
     class Internal;
     /// @internal Reference counted internals.
