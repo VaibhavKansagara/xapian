@@ -11,6 +11,7 @@ dnl See xapian-core's HACKING document for details of the reasons for required
 dnl versions.
 AM_INIT_AUTOMAKE([1.13 parallel-tests -Wportability subdir-objects tar-ustar no-dist-gzip dist-xz])
 AC_CONFIG_SRCDIR([xapian-headers.i])
+AC_CONFIG_SRCDIR([xapianletor-headers.i])
 
 AC_CONFIG_HEADERS([config.h])
 

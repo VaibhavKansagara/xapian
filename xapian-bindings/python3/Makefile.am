@@ -40,6 +40,7 @@ EXTRA_DIST = python.i pythonletor.i util.i utilletor.i extra.i extracomments.i e
 	doxy2swig.py \
 	fixup-swig-py3-wrapper \
 	generate-python-exceptions \
+	generate-letor-python-exceptions \
 	run-python-test \
 	sphinx-build \
 	testsuite.py \
