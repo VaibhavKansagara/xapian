@@ -9,7 +9,7 @@ endif
 EXTRA_DIST = xapian-head.i xapian-headers.i generic/except.i \
     generic/exceptletor.i \
     generic/generate-generic-exceptions \
-	generic/generate-letor-generic-exceptions \
+    generic/generate-letor-generic-exceptions \
     swig-depcomp \
     xapian-bindings.spec shortstop.list skiptest \
     HACKING
