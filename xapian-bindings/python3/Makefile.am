@@ -64,9 +64,7 @@ letorpkgpylib_DATA = xapianletor/__init__.py \
 		xapianletor/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
 		xapianletor/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@
 
-pkgpylib_LTLIBRARIES = _xapian.la
-
-letorpkgpylib_LTLIBRARIES = _xapianletor.la
+pkgpylib_LTLIBRARIES = _xapian.la _xapianletor.la
 
 # Remove the .la file - _xapian.la is never linked against (it's a module)
 # and Python doesn't use libltdl.  Note that the library gets installed by
