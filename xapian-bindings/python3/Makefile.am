@@ -45,34 +45,41 @@ EXTRA_DIST = python.i pythonletor.i util.i utilletor.i extra.i extracomments.i e
 	sphinx-build \
 	testsuite.py \
 	test_xapian_star.py \
+	test_xapian_letor_star.py \
 	$(TESTS) $(BUILT_SOURCES) $(RST_DOCS)
 
-pkgpylibdir = @PYTHON3_LIB@/xapian \
-	@PYTHON3_LIB@/xapianletor
+pkgpylibdir = @PYTHON3_LIB@/xapian
+
+letorpkgpylibdir = @PYTHON3_LIB@/xapianletor
 
 # Install as _DATA rather than _SCRIPTS because we don't want to make these
 # executable (they don't have a #! line).
 pkgpylib_DATA = xapian/__init__.py \
 		xapian/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
-		xapian/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@ \
-		xapianletor/__init__.py \
+		xapian/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@
+
+# Install as _DATA rather than _SCRIPTS because we don't want to make these
+# executable (they don't have a #! line).
+letorpkgpylib_DATA = xapianletor/__init__.py \
 		xapianletor/__pycache__/__init__.@PYTHON3_CACHE_TAG@.pyc \
 		xapianletor/__pycache__/__init__.@PYTHON3_CACHE_OPT1_EXT@
 
-pkgpylib_LTLIBRARIES = _xapian.la _xapianletor.la
+pkgpylib_LTLIBRARIES = _xapian.la
+
+letorpkgpylib_LTLIBRARIES = _xapianletor.la
 
 # Remove the .la file - _xapian.la is never linked against (it's a module)
 # and Python doesn't use libltdl.  Note that the library gets installed by
 # install-data, so that's where we need to hook.
 install-data-hook:
 	rm -f $(DESTDIR)$(pkgpylibdir)/_xapian.la
-	rm -f $(DESTDIR)$(pkgpylibdir)/_xapianletor.la
+	rm -f $(DESTDIR)$(letorpkgpylibdir)/_xapianletor.la
 
 # Because we don't install the .la file, "make uninstall" doesn't work and
 # we need to remove the file ourselves.
 uninstall-local:
 	rm -f $(DESTDIR)$(pkgpylibdir)/_xapian$(PYTHON3_SO)
-	rm -f $(DESTDIR)$(pkgpylibdir)/_xapianletor$(PYTHON3_SO)
+	rm -f $(DESTDIR)$(letorpkgpylibdir)/_xapianletor$(PYTHON3_SO)
 
 AM_CPPFLAGS = -I$(PYTHON3_INC)
 AM_CXXFLAGS = $(SWIG_CXXFLAGS) $(XAPIAN_CXXFLAGS) $(XAPIANLETOR_CXXFLAGS)

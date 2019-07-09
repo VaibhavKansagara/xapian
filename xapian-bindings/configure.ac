@@ -95,7 +95,7 @@ XO_LIB_XAPIAN([], [],
 			  [^\([0-9]*\.[0-9]*[13579]\)\..*$], [-\1]))
 XO_REQUIRE([1.4.0])
 
-dnl Check for xapian-core.
+dnl Check for xapian-letor.
 XO_LIB_XAPIANLETOR([], [], [xapianletor-config])
 
 NEED_JNILIB_EXT=no

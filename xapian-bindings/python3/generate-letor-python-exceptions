@@ -24,28 +24,6 @@ use exception_data;
 
 my @allclasses = (@baseclasses, @classes);
 
-my @posting_source_virtual_methods = qw(
-    get_termfreq_min
-    get_termfreq_est
-    get_termfreq_max
-    get_maxweight
-    get_weight
-    next
-    skip_to
-    check
-    at_end
-    get_docid
-    get_description
-    init
-    name
-);
-
-my @matchspy_virtual_methods = qw(
-    name
-    merge_results
-    get_description
-);
-
 open FD, ">exceptletor.i" or die $!;
 
 $copyright =~ s/^/ */mg;
