@@ -3,7 +3,7 @@
 include ../generic/generic.mk
 
 ## Test programs to be run
-TESTS = smoketest.py pythontest.py
+TESTS = smoketest.py pythontest.py pythonletortest.py
 AM_TESTS_ENVIRONMENT = \
 	abs_builddir='$(abs_builddir)' ;\
 	srcdir='$(srcdir)' ;\
