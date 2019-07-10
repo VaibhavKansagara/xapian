@@ -47,41 +47,41 @@ def setup_database_two():
     termgen.set_stemmer(xapian.Stem("en"))
     termgen.index_text("Lions, Tigers, Bears and Giraffes", 1, "S")
     termgen.index_text("This paragraph talks about lions and tigers and "
-			     "bears (oh, my!). It mentions giraffes, "
-			     "but that's not really very important. Lions "
-			     "and tigers are big cats, so they must be really "
-			     "cuddly. Bears are famous for being cuddly, at "
-			     "least when they're teddy bears.", 1, "XD")
+			"bears (oh, my!). It mentions giraffes, "
+			"but that's not really very important. Lions "
+			"and tigers are big cats, so they must be really "
+			"cuddly. Bears are famous for being cuddly, at "
+			"least when they're teddy bears.", 1, "XD")
     termgen.index_text("Lions, Tigers, Bears and Giraffes")
     termgen.increase_termpos()
     termgen.index_text("This paragraph talks about lions and tigers and "
-			     "bears (oh, my!). It mentions giraffes, "
-			     "but that's not really very important. Lions "
-			     "and tigers are big cats, so they must be really "
-			     "cuddly. Bears are famous for being cuddly, at "
-			     "least when they're teddy bears.")
+			"bears (oh, my!). It mentions giraffes, "
+			"but that's not really very important. Lions "
+			"and tigers are big cats, so they must be really "
+			"cuddly. Bears are famous for being cuddly, at "
+			"least when they're teddy bears.")
     db.add_document(doc)
     doc.clear_terms()
     termgen.index_text("Lions, Tigers and Bears", 1, "S")
     termgen.index_text("This is the paragraph of interest. Tigers are "
-			     "massive beasts - I wouldn't want to meet a "
-			     "hungry one anywhere. Lions are scary even when "
-			     "lyin' down. Bears are scary even when bare. "
-			     "Together I suspect they'd be less scary, as the "
-			     "tigers, lions, and bears would all keep each "
-			     "other busy. On the other hand, bears don't live "
-			     "in the same continent as far as I know.", 1,
-			     "XD")
+			"massive beasts - I wouldn't want to meet a "
+			"hungry one anywhere. Lions are scary even when "
+			"lyin' down. Bears are scary even when bare. "
+			"Together I suspect they'd be less scary, as the "
+			"tigers, lions, and bears would all keep each "
+			"other busy. On the other hand, bears don't live "
+			"in the same continent as far as I know.", 1,
+			"XD")
     termgen.index_text("Lions, Tigers and Bears")
     termgen.increase_termpos()
     termgen.index_text("This is the paragraph of interest. Tigers are "
-			     "massive beasts - I wouldn't want to meet a "
-			     "hungry one anywhere. Lions are scary even when "
-			     "lyin' down. Bears are scary even when bare. "
-			     "Together I suspect they'd be less scary, as the "
-			     "tigers, lions, and bears would all keep each "
-			     "other busy. On the other hand, bears don't live "
-			     "in the same continent as far as I know.")
+			"massive beasts - I wouldn't want to meet a "
+			"hungry one anywhere. Lions are scary even when "
+			"lyin' down. Bears are scary even when bare. "
+			"Together I suspect they'd be less scary, as the "
+			"tigers, lions, and bears would all keep each "
+			"other busy. On the other hand, bears don't live "
+			"in the same continent as far as I know.")
     db.add_document(doc)
     expect(db.get_doccount(), 2)
     db.commit()
