@@ -12,6 +12,7 @@
 /modern
 /except.i
 /exceptletor.i
+/database_two_docs
 /doccomments.i
 /doctrees
 /docs/conf.py
@@ -25,6 +26,8 @@
 /*test.py.log
 /*test.py.trs
 /test-suite.log
+/testdata
+/output_files
 /xapian.py
 /xapian_wrap.cc
 /xapian_wrap.d

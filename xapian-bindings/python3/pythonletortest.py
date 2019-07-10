@@ -35,38 +35,12 @@ except ImportError:
 
 from testsuite import *
 
-def setup_database_one():
-    """Set database with 1 document.
-
-    """
-    db = xapian.WritableDatabase('', xapian.DB_BACKEND_INMEMORY)
-    doc = xapian.Document()
-    termgen = xapian.TermGenerator()
-    termgen.set_document(doc)
-    termgen.set_stemmer(xapian.Stem('en'))
-
-    termgen.index_text("Tigers are solitary animals", 1, "S")
-    termgen.index_text("Might be that only one Tiger is good enough to "
-			     "Take out a ranker, a Tiger is a good way to "
-			     "check if a test is working or Tiger not. Tiger."
-			     "What if the next line contains no Tigers? Would "
-			     "it make a difference to your ranker ?  Tigers  "
-			     "for the win.", 1, "XD")
-    termgen.index_text("The will.")
-    termgen.increase_termpos()
-    termgen.index_text("Tigers would not be caught if one calls out the "
-			     "Tiger from the den. This document is to check if "
-			     "in the massive dataset, you forget the sense of "
-			     "something you would not like to stop.")
-    db.add_document(doc)
-    expect(db.get_doccount(), 1)
-    return db
-
 def setup_database_two():
     """Set database with 2 documents.
 
     """
-    db = xapian.WritableDatabase('', xapian.DB_BACKEND_INMEMORY)
+    dbpath = "database_two_docs"
+    db = xapian.WritableDatabase(dbpath, xapian.DB_CREATE_OR_OVERWRITE)
     doc = xapian.Document()
     termgen = xapian.TermGenerator()
     termgen.set_document(doc)
@@ -110,70 +84,56 @@ def setup_database_two():
 			     "in the same continent as far as I know.")
     db.add_document(doc)
     expect(db.get_doccount(), 2)
-    return db
+    db.commit()
 
-def setup_database_three():
-    """Set database with 3 documents.
+def test_preparetrainingfile():
+    dbpath = b"database_two_docs"
+    data_directory = "./testdata/"
+    query = data_directory + "query.txt"
+    qrel = data_directory + "qrel.txt"
+    training_data = data_directory + "training_data.txt"
+    xapianletor.prepare_training_file(dbpath, query, qrel, 10,
+				      "output_files/training_output1.txt")
+    import filecmp
+    expect(filecmp.cmp(training_data, "output_files/training_output1.txt"), True)
 
-    """
-    db = xapian.WritableDatabase('', xapian.DB_BACKEND_INMEMORY)
-    doc = xapian.Document()
-    termgen = xapian.TermGenerator()
-    termgen.set_document(doc)
-    termgen.set_stemmer(xapian.Stem("en"))
-    termgen.index_text("The will", 1, "S")
-    termgen.index_text("The will are considered stop words in xapian and "
-			     "would be thrown off, so the query I want to say "
-			     "is score, yes, score. The Score of a game is "
-			     "the determining factor of a game, the score is "
-			     "what matters at the end of the day. so my advise "
-			     "to everyone is to Score it!.", 1, "XD")
-    termgen.index_text("Score might be something else too, but this para "
-			     "refers to score only at an abstract. Scores are "
-			     "in general scoring. Score it!")
-    termgen.increase_termpos()
-    termgen.index_text("Score score score is important.")
-    db.add_document(doc)
-    doc.clear_terms()
-    termgen.index_text("Score score score score score score", 1, "S")
-    termgen.index_text("it might have an absurdly high rank in the qrel "
-			     "file or might have no rank at all in another. "
-			     "Look out for this as a testcase, might be edgy "
-			     "good luck and may this be with you.", 1, "XD")
-    termgen.index_text("Another irrelevant paragraph to make sure the tf "
-			     "values are down, but this increases idf values "
-			     "but let's see how this works out.")
-    termgen.increase_termpos()
-    termgen.index_text("Nothing to do with the query.")
-    db.add_document(doc)
-    doc.clear_terms()
-    termgen.index_text("Document has nothing to do with score", 1, "S")
-    termgen.index_text("This is just to check if score is given a higher "
-			     "score if it is in the subject or not. Nothing "
-			     "special, just juding scores by the look of it. "
-			     "Some more scores but a bad qrel should be enough "
-			     "to make sure it is ranked down.", 1, "XD")
-    termgen.index_text("Score might be something else too, but this para "
-			     "refers to score only at an abstract. Scores are "
-			     "in general scoring. Score it!")
-    termgen.increase_termpos()
-    termgen.index_text("Score score score is important.")
-    db.add_document(doc)
-    expect(db.get_doccount(), 3)
-    return db
-
-def test_createfeaturevector():
-    db = setup_database_two()
-    enquire = xapian.Enquire(db)
+def test_ranker():
+    ranker = xapianletor.ListNETRanker()
+    expect_exception(xapianletor.FileNotFoundError, "No training file found. Check path.", ranker.train_model, "")
+    setup_database_two()
+    dbpath = b"database_two_docs"
+    enquire = xapian.Enquire(xapian.Database(dbpath))
     enquire.set_query(xapian.Query("lions"))
     mset = enquire.get_mset(0, 10)
-
     expect(mset.size(), 2)
-    fl = xapianletor.FeatureList()
-    fv = fl.create_feature_vectors(mset, xapian.Query("lions"), db)
-    expect(fv.size(), 2)
-#     expect(fv[0].get_fcount(), 19)
-#     expect(fv[1].get_fcount(), 19)
+
+    data_directory = "./testdata/"
+    query = data_directory + "query.txt"
+    qrel = data_directory + "qrel.txt"
+    training_data = data_directory + "training_data.txt"
+    ranker.set_database_path(dbpath)
+    expect(ranker.get_database_path(), dbpath)
+
+    ranker.set_query(xapian.Query("lions"))
+    ranker.train_model(training_data, "ListNet_Ranker")
+    doc1 = mset[0]
+    doc2 = mset[1]
+    ranker.rank(mset, "ListNet_Ranker")
+    expect(doc1.docid, mset[1].docid)
+    expect(doc2.docid, mset[0].docid)
+    expect_exception(xapianletor.LetorInternalError, None,
+		     ranker.score, query, qrel, "ListNet_Ranker",
+		     "output_files/scorer_output.txt", 10, "")
+    expect_exception(xapianletor.FileNotFoundError, None,
+		     ranker.score, "", qrel, "ListNet_Ranker",
+		     "output_files/scorer_output.txt", 10)
+    expect_exception(xapianletor.FileNotFoundError, None,
+		     ranker.score, qrel, "", "ListNet_Ranker",
+		     "output_files/scorer_output.txt", 10)
+    ranker.score(query, qrel, "ListNet_Ranker",
+		 "output_files/ndcg_output_ListNet_2.txt", 10)
+    ranker.score(query, qrel, "ListNet_Ranker",
+		 "output_files/err_output_ListNet_2.txt", 10, "ERRScore")
 
 def test_import_letor_star():
     """Test that "from xapianletor import *" works.
