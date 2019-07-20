@@ -361,7 +361,7 @@ if test yes = "$GXX"; then
 
       dnl Automatically add -Werror if maintainer mode is enabled.
       if test x$USE_MAINTAINER_MODE = xyes; then
-	AM_CXXFLAGS="$AM_CXXFLAGS -Werror"
+	AM_CXXFLAGS="$AM_CXXFLAGS"
       fi
       ;;
     *__clang__*)
@@ -373,7 +373,7 @@ if test yes = "$GXX"; then
 
       dnl Automatically add -Werror if maintainer mode is enabled.
       if test x$USE_MAINTAINER_MODE = xyes; then
-	AM_CXXFLAGS="$AM_CXXFLAGS -Werror"
+	AM_CXXFLAGS="$AM_CXXFLAGS"
       fi
       ;;
     *__INTEL_COMPILER*)
@@ -383,7 +383,7 @@ if test yes = "$GXX"; then
 
       dnl Automatically add -Werror if maintainer mode is enabled.
       if test x$USE_MAINTAINER_MODE = xyes; then
-	AM_CXXFLAGS="$AM_CXXFLAGS -Werror"
+	AM_CXXFLAGS="$AM_CXXFLAGS"
       fi
       ;;
   esac
@@ -392,7 +392,7 @@ if test yes = "$GXX"; then
     dnl GCC doesn't support symbol visibility on all platforms (e.g. it isn't
     dnl on mingw).
     AC_MSG_CHECKING([if $CXX -fvisibility=hidden works])
-    if echo 'int bar() __attribute__((visibility("default"))); int foo() {return 42;}'|$CXX -Werror -fvisibility=hidden -c -oconftest.o -xc++ - >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD ; then
+    if echo 'int bar() __attribute__((visibility("default"))); int foo() {return 42;}'|$CXX -fvisibility=hidden -c -oconftest.o -xc++ - >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD ; then
       AC_MSG_RESULT([yes])
       AM_CXXFLAGS="$AM_CXXFLAGS -fvisibility=hidden"
       dash_d_visibility=-DXAPIAN_ENABLE_VISIBILITY

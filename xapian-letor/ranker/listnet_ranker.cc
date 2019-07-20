@@ -120,12 +120,12 @@ update_parameters(vector<double> &new_parameters, const vector<double> &gradient
 }
 
 void
-ListNETRanker::train(const std::vector<Xapian::FeatureVector> & training_data) {
+ListNETRanker::train(const std::map<string, vector<Xapian::FeatureVector>> & training_data) {
     LOGCALL_VOID(API, "ListNETRanker::train", training_data);
     size_t fvv_len = training_data.size();
     int feature_cnt = -1;
     if (fvv_len != 0) {
-	feature_cnt = training_data[0].get_fcount();
+	feature_cnt = training_data.begin()->second[0].get_fcount();
     } else {
 	throw LetorInternalError("Training data is empty. Check training file.");
     }
@@ -133,13 +133,15 @@ ListNETRanker::train(const std::vector<Xapian::FeatureVector> & training_data) {
     vector<double> new_parameters(feature_cnt, 0.0);
 
     // iterations
-    for (int iter_num = 1; iter_num < iterations; ++iter_num) {
-	// initialize Probability distributions of y and z
-	prob_distrib_vector prob = init_probability(training_data, new_parameters);
-	// compute gradient
-	vector<double> gradient = calculate_gradient(training_data, prob);
-	// update parameters: w = w - gradient * learningRate
-	update_parameters(new_parameters, gradient, learning_rate);
+    for (int iter_num = 1; iter_num <= iterations; ++iter_num) {
+	for (auto it = training_data.begin(); it != training_data.end(); ++it) {
+	    // initialize Probability distributions of y and z
+	    prob_distrib_vector prob = init_probability(it->second, new_parameters);
+	    // compute gradient
+	    vector<double> gradient = calculate_gradient(it->second, prob);
+	    // update parameters: w = w - gradient * learningRate
+	    update_parameters(new_parameters, gradient, learning_rate);
+	}
     }
     swap(parameters, new_parameters);
 }
