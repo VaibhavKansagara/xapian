@@ -39,6 +39,7 @@
 #include <fstream>
 #include <iomanip>
 #include <limits>
+#include <random>
 #include <sstream>
 #include <vector>
 
@@ -119,6 +120,13 @@ update_parameters(vector<double> &new_parameters, const vector<double> &gradient
     }
 }
 
+static void
+normalize(vector<double>& gradient, int size) {
+    for (int i = 0; i < gradient.size(); i++) {
+	gradient[i] /= size;
+    }
+}
+
 void
 ListNETRanker::train(const std::map<string, vector<Xapian::FeatureVector>> & training_data) {
     LOGCALL_VOID(API, "ListNETRanker::train", training_data);
@@ -128,9 +136,14 @@ ListNETRanker::train(const std::map<string, vector<Xapian::FeatureVector>> & tra
 	feature_cnt = training_data.begin()->second[0].get_fcount();
     } else {
 	throw LetorInternalError("Training data is empty. Check training file.");
+    }    
+    // initialize the parameters for neural network with Xavier initialization.
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    vector<double> new_parameters;
+    for (int i = 0; i < feature_cnt; i++) {
+	new_parameters.push_back(distribution(generator) * sqrt(2.0 / feature_cnt));
     }
-    // initialize the parameters for neural network
-    vector<double> new_parameters(feature_cnt, 0.0);
 
     // iterations
     for (int iter_num = 1; iter_num <= iterations; ++iter_num) {
@@ -139,6 +152,8 @@ ListNETRanker::train(const std::map<string, vector<Xapian::FeatureVector>> & tra
 	    prob_distrib_vector prob = init_probability(it->second, new_parameters);
 	    // compute gradient
 	    vector<double> gradient = calculate_gradient(it->second, prob);
+	    // normalize gradinet
+	    normalize(gradient, it->second.size());
 	    // update parameters: w = w - gradient * learningRate
 	    update_parameters(new_parameters, gradient, learning_rate);
 	}

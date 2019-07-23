@@ -132,6 +132,8 @@ FeatureList::create_feature_vectors(const Xapian::MSet & mset,
 	double wt = i.get_weight();
 	// Weight is added as a feature by default.
 	fvals.push_back(wt);
+	// Add a bias term.
+	fvals.push_back(1.0);
 	Xapian::docid did = doc.get_docid();
 	// construct a FeatureVector object using did and fvals.
 	Xapian::FeatureVector fv(did, fvals);
