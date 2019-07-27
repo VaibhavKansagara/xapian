@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <limits>
@@ -138,11 +139,13 @@ ListNETRanker::train(const std::map<string, vector<Xapian::FeatureVector>> & tra
 	throw LetorInternalError("Training data is empty. Check training file.");
     }    
     // initialize the parameters for neural network with Xavier initialization.
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0.0, 1.0);
+    // construct a trivial random generator engine from a time-based seed:
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::normal_distribution<double> distribution(0.0, sqrt(1.0 / feature_cnt));
     vector<double> new_parameters;
     for (int i = 0; i < feature_cnt; i++) {
-	new_parameters.push_back(distribution(generator) * sqrt(2.0 / feature_cnt));
+	new_parameters.push_back(distribution(generator));
     }
 
     // iterations
