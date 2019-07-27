@@ -139,6 +139,9 @@ jni_LTLIBRARIES = libxapian_jni.la
 # install-data, so that's where we need to hook.
 install-data-hook:
 	rm -f $(DESTDIR)$(jnidir)/libxapian_jni.la
+if LETOR_FOUND
+	rm -f $(DESTDIR)$(jnidir)/libxapianletor_jni.la
+endif
 
 # Because we don't install the .la file, "make uninstall" doesn't work and
 # we need to remove the file ourselves.
@@ -155,8 +158,9 @@ SHREXT=-shrext .jnilib
 else
 SHREXT=
 endif
-AM_CXXFLAGS = $(SWIG_CXXFLAGS) $(XAPIAN_CXXFLAGS)
+
 AM_CPPFLAGS = $(JAVA_CPPFLAGS)
+libxapian_jni_la_CXXFLAGS = $(SWIG_CXXFLAGS) $(XAPIAN_CXXFLAGS)
 libxapian_jni_la_LDFLAGS = -avoid-version -module $(SHREXT) $(NO_UNDEFINED)
 libxapian_jni_la_LIBADD = $(XAPIAN_LIBS)
 libxapian_jni_la_SOURCES = xapian_wrap.cc
@@ -191,10 +195,6 @@ $(stamp):
 
 CLEANFILES += $(stamp)
 endif
-MAINTAINERCLEANFILES = $(BUILT_SOURCES)
-
-maintainer-clean-local:
-	rm -rf built org
 
 exampledatadir = $(docdir)/java/examples
 dist_exampledata_DATA =\
@@ -211,3 +211,81 @@ BUILT_SOURCES += docs/index.html
 	-case "$@" in */*) d=`echo "$@"|sed 's,/[^/]*$$,,'`; $(MKDIR_P) "$$d" ;; esac
 	$(RST2HTML) --exit-status=warning $< $@
 endif
+
+if LETOR_FOUND
+
+XAPIAN_SWIG_JAVA_LETOR_SRCS=\
+    org/xapianletor/CollTfCollLenFeature.java\
+	org/xapianletor/ERRScore.java\
+	org/xapianletor/IdfFeature.java\
+    org/xapianletor/Feature.java\
+	org/xapianletor/FeatureList.java\
+	org/xapianletor/FeatureVector.java\
+	org/xapianletor/ListNETRanker.java\
+	org/xapianletor/ListMLERanker.java\
+	org/xapianletor/NDCGScore.java\
+	org/xapianletor/Ranker.java\
+	org/xapianletor/Scorer.java\
+	org/xapianletor/SVMRanker.java\
+	org/xapianletor/SWIGTYPE_p_std__vectorT_double_t.java\
+	org/xapianletor/SWIGTYPE_p_std__vectorT_Xapian__Feature_p_t.java\
+	org/xapianletor/SWIGTYPE_p_std__vectorT_Xapian__FeatureVector_t.java\
+	org/xapianletor/TfDoclenCollTfCollLenFeature.java\
+	org/xapianletor/TfDoclenFeature.java\
+	org/xapianletor/TfIdfDoclenFeature.java\
+	org/xapianletor/TfFeature.java\
+	org/xapianletor/Xapianletor.java\
+	org/xapianletor/XapianletorJNI.java
+
+XAPIAN_SWIG_JAVA_LETOR_CLASS = $(XAPIAN_SWIG_JAVA_LETOR_SRCS:.java=.class)
+
+noinst_DATA += built/xapianletor.jar
+
+built/xapianletor.jar: built/xapian.jar $(XAPIAN_SWIG_JAVA_LETOR_SRCS)
+	$(JAR) -cf built/xapianletor.jar org/xapianletor/*.class
+
+jniletordir = `pwd`/built
+
+jniletor_LTLIBRARIES = libxapianletor_jni.la
+
+libxapianletor_jni_la_CXXFLAGS = $(SWIG_CXXFLAGS) $(XAPIAN_CXXFLAGS) $(XAPIANLETOR_CXXFLAGS)
+libxapianletor_jni_la_LDFLAGS = -avoid-version -module $(SHREXT) $(NO_UNDEFINED)
+libxapianletor_jni_la_LIBADD = $(XAPIANLETOR_LIBS)
+libxapianletor_jni_la_SOURCES = xapianletor_wrap.cc
+
+SWIG_LETOR_GENERATED = xapianletor_wrap.cc xapianletor_wrap.h $(XAPIAN_SWIG_JAVA_LETOR_SRCS)
+
+BUILT_SOURCES += $(SWIG_LETOR_GENERATED)
+
+EXTRA_DIST += javaletor.i $(SWIG_LETOR_GENERATED)
+
+if MAINTAINER_MODE
+stampletor = xapianletor_wrap.stamp
+RUN_SWIG_LETOR = stampletor='$(stampletor)' $(PERL) '$(top_srcdir)'/swig-depcomp $(SWIG)
+
+xapianletor_wrap.cc xapianletor_wrap.h $(XAPIAN_SWIG_JAVA_LETOR_SRCS): xapian_wrap.cc xapian_wrap.h $(XAPIAN_SWIG_JAVA_SRCS) $(stampletor)
+	$(make_many_locked)
+$(stampletor):
+	$(multitarget_begin)
+	: # Make sure that we don't package stale generated sources in the
+	: # case where SWIG changes its mind as to which files it generates.
+	-rm -f org/xapianletor/*
+	$(MKDIR_P) org/xapianletor
+	$(RUN_SWIG_LETOR) $(SWIG_WERROR) -I'$(srcdir)' $(SWIG_FLAGS) $(SWIG_LETOR_FLAGS) -c++ \
+	    -java -module Xapianletor -package org.xapianletor -outdir org/xapianletor \
+	    -o xapianletor_wrap.cc '$(srcdir)/'javaletor.i
+	: # Check that exactly the sources we expected were generated.
+	$(PERL) -e 'print "$$_\n" for sort @ARGV' org/xapianletor/*.java > org/xapianletor/list
+	$(PERL) -e 'print "$$_\n" for sort @ARGV' $(XAPIAN_SWIG_JAVA_LETOR_SRCS)|diff -c - org/xapianletor/list
+	$(multitarget_end)
+
+-include xapianletor_wrap.d
+
+CLEANFILES += $(stampletor)
+endif
+
+endif
+
+MAINTAINERCLEANFILES = $(BUILT_SOURCES)
+maintainer-clean-local:
+	rm -rf built org
